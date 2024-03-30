@@ -10,19 +10,20 @@ class WordController extends Controller
 {
     public function search(Request $request){
         $search = strtolower($request->input('word'));
-        $word = Word::where('word', $search)->first();
+        $words = Word::where('word', $search)->get();
         $points = 0;
-        if($word){
-            $numberOfUniqueLetters = count(array_unique(str_split(strtolower($word->word))));
+        if(count($words) > 0){
+            $word = $words[0]->word;
+            $numberOfUniqueLetters = count(array_unique(str_split(strtolower($word))));
             $points += $numberOfUniqueLetters;
             $isPalindrome = false;
             $isAlmostPalindrome = false;
-            if($search === strrev(strtolower($word->word))){
+            if($search === strrev(strtolower($word))){
                 $isPalindrome = true;
                 $points += 3;
             }else{
-                for($i = 0; $i < mb_strlen($word->word); $i++){
-                    $arrayFromString = str_split($word->word);
+                for($i = 0; $i < mb_strlen($word); $i++){
+                    $arrayFromString = str_split($word);
                     unset($arrayFromString[$i]);
                     $newString = strtolower(implode($arrayFromString));
                     $array[] = $newString;
@@ -34,7 +35,7 @@ class WordController extends Controller
                 }
             }
             return response()->json([
-                'word' => $word,
+                'words' => $words,
                 'numberOfUniqueLetters' => $numberOfUniqueLetters,
                 'isPalindrome' => $isPalindrome,
                 'isAlmostPalindrome' => $isAlmostPalindrome,
